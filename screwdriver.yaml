@@ -1,0 +1,23 @@
+shared:
+  image: node:8
+jobs:
+  release:
+    requires: [~commit, ~sd@469:tests]
+    steps:
+      - release-build: echo "mvn release-build"
+      - sonar: echo "mvn sonar:sonar"
+      - publish-artifactory: echo "publish.sh"
+  fortify-check:
+    requires: [release]
+    steps:
+      - fortify: echo "fortify.sh"
+  asset-analysis:
+    requires: [release]
+    steps:
+      - asset: echo "asset-check.sh"
+  deploy:
+    settings:
+      DEPLOY_ENV: "VZW-DEV.verizon.com"
+    requires: [fortify-check, asset-analysis]
+    steps:
+      - deploy: echo "deploy.sh"
